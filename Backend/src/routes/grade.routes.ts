@@ -1,0 +1,12 @@
+import { Router } from "express";
+import { GradeController } from "../controllers/grade.controller.js";
+const router = Router();
+const gradeController = new GradeController();
+router.post('/', gradeController.create.bind(gradeController));
+router.get('/', gradeController.getAll.bind(gradeController));
+router.get('/:id', gradeController.getById.bind(gradeController));
+router.get('/student/:studentId', gradeController.getByStudent.bind(gradeController));
+router.get('/course/:courseId', gradeController.getByCours.bind(gradeController));
+router.put('/:id', gradeController.update.bind(gradeController));
+router.delete('/:id', gradeController.delete.bind(gradeController));
+export default router;
