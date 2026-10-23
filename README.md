@@ -54,3 +54,29 @@ npm run dev
 Open `http://localhost:5173`. The Vite development server forwards `/api`
 requests to the backend at `http://localhost:3000`. To use another backend,
 update the proxy target in `frontend/vite.config.ts`.
+
+## Run with Docker Compose
+
+1. Install and start Docker Desktop.
+2. From the repository root, copy `.env.example` to `.env` and replace the
+   example passwords and JWT secret with strong, private values. Do not commit
+   `.env`.
+3. Build and start MySQL, the API, and the frontend:
+
+   ```powershell
+   docker compose up --build -d
+   ```
+
+4. Open `http://localhost:8080`. The frontend's Nginx server serves the app and
+   forwards `/api` requests to the backend.
+
+To inspect service status and logs:
+
+```powershell
+docker compose ps
+docker compose logs -f backend
+```
+
+Stop the services while preserving database data with
+`docker compose down`. Database files are kept in the `mysql_data` volume; do
+not use `docker compose down -v` unless you intend to delete that data.
