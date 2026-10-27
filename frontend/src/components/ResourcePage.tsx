@@ -1,4 +1,11 @@
-import { Activity, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import {
+  Activity,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  UsersRound,
+} from "lucide-react";
 import { EmptyState } from "./Dashboard";
 import type { DataStore, Resource, Row } from "../types";
 
@@ -13,6 +20,7 @@ type ResourcePageProps = {
   onCreate: () => void;
   onEdit: (row: Row) => void;
   onDelete: (row: Row) => void;
+  onManageStudents?: (row: Row) => void;
 };
 
 export function ResourcePage({
@@ -26,6 +34,7 @@ export function ResourcePage({
   onCreate,
   onEdit,
   onDelete,
+  onManageStudents,
 }: ResourcePageProps) {
   const Icon = resource.icon;
 
@@ -33,9 +42,7 @@ export function ResourcePage({
     <section className="resource-page">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">
-            <Activity size={14} /> MANAGEMENT
-          </div>
+          <div className="eyebrow">MANAGEMENT</div>
           <h1>{resource.label}</h1>
           <p>
             Keep your {resource.label.toLowerCase()} organized and up to date.
@@ -54,7 +61,7 @@ export function ResourcePage({
           <span>Total {resource.label.toLowerCase()}</span>
         </div>
         <span className="summary-note">
-          <Activity size={15} /> Live from your database
+          <Activity size={15} /> Live data
         </span>
       </div>
       <div className="table-panel">
@@ -111,6 +118,16 @@ export function ResourcePage({
                       );
                     })}
                     <td className="row-actions">
+                      {onManageStudents && (
+                        <button
+                          className="row-action"
+                          onClick={() => onManageStudents(row)}
+                          aria-label={`Manage students in ${row.name}`}
+                          title="Manage students"
+                        >
+                          <UsersRound size={16} />
+                        </button>
+                      )}
                       {resource.editFields.length > 0 && (
                         <button
                           className="row-action"

@@ -10,6 +10,7 @@ import logger from './utils/logger.js';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import attendanceRoutes from './routes/attendance.routes.js';
 import teacherRoutes from './routes/teacher.routes.js';
+import classRoutes from './routes/class.routes.js';
 
 const app = express();
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/grades', gradeRoutes)
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/classes', classRoutes);
 app.use((req: Request, res: Response) => {
   logger.warn(`404 Not Found: ${req.method} ${req.path}`);
   res.status(404).json({

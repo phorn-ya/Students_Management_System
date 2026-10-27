@@ -6,6 +6,7 @@ export class StudentModel implements Student {
   first_name: string;
   last_name: string;
   department_id: number | null;
+  class_id: number | null;
   created_at?: string;
   updated_at?: string;
 
@@ -15,6 +16,7 @@ export class StudentModel implements Student {
     this.first_name = data.first_name;
     this.last_name = data.last_name;
     this.department_id = data.department_id;
+    this.class_id = data.class_id;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
   }

@@ -4,7 +4,11 @@ import { request } from "./api";
 import { resources } from "./resources";
 import { AppFooter, AppHeader } from "./components/AppChrome";
 import { Dashboard } from "./components/Dashboard";
-import { LoginDialog, RecordDialog } from "./components/Dialogs";
+import {
+  ClassStudentsDialog,
+  LoginDialog,
+  RecordDialog,
+} from "./components/Dialogs";
 import { ResourcePage } from "./components/ResourcePage";
 import { Sidebar } from "./components/Sidebar";
 import type { DataStore, PageKey, Resource, Row } from "./types";
@@ -17,6 +21,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [dialogResource, setDialogResource] = useState<Resource | null>(null);
   const [editing, setEditing] = useState<Row | null>(null);
+  const [managingClass, setManagingClass] = useState<Row | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
@@ -107,10 +112,12 @@ function App() {
           first_name: body.first_name,
           last_name: body.last_name,
           department_id: body.department_id ? Number(body.department_id) : null,
+          class_id: body.class_id ? Number(body.class_id) : null,
         };
       } else {
         for (const key of [
           "department_id",
+          "class_id",
           "teacher_id",
           "student_id",
           "course_id",
@@ -147,9 +154,13 @@ function App() {
   }
 
   async function deleteRecord(resource: Resource, row: Row) {
+    const confirmation =
+      resource.key === "classes"
+        ? "Delete this class? Students assigned to it will become unassigned."
+        : `Delete this ${resource.singular}? This action cannot be undone.`;
     if (
       !window.confirm(
-        `Delete this ${resource.singular}? This action cannot be undone.`,
+        confirmation,
       )
     )
       return;
@@ -164,6 +175,51 @@ function App() {
         error instanceof Error ? error.message : "Could not delete the record",
       );
     }
+  }
+
+  async function saveClassStudents(studentIds: number[]) {
+    if (!managingClass) return;
+    setSaving(true);
+    const selectedIds = new Set(studentIds);
+    const students = data.students ?? [];
+    const changes = students.filter((student) => {
+      const assignedClassId =
+        student.class_id == null ? null : Number(student.class_id);
+      const belongsInSelectedClass = selectedIds.has(Number(student.id));
+      return belongsInSelectedClass
+        ? assignedClassId !== Number(managingClass.id)
+        : assignedClassId === Number(managingClass.id);
+    });
+    const results = await Promise.allSettled(
+      changes.map((student) =>
+        request(`/students/${student.id}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            class_id: selectedIds.has(Number(student.id))
+              ? Number(managingClass.id)
+              : null,
+          }),
+        }),
+      ),
+    );
+    const failedResults = results.filter(
+      (result) => result.status === "rejected",
+    );
+    if (failedResults.length) {
+      const updated = results.length - failedResults.length;
+      const reason = failedResults[0].reason;
+      const error =
+        reason instanceof Error ? reason.message : "Please try again.";
+      setToast(
+        `${updated} student assignment${updated === 1 ? "" : "s"} saved; ${failedResults.length} failed: ${error}`,
+      );
+      setRefreshToken((value) => value + 1);
+    } else {
+      setToast(`Students updated for ${managingClass.name}`);
+      setManagingClass(null);
+      setRefreshToken((value) => value + 1);
+    }
+    setSaving(false);
   }
 
   async function login(values: Row) {
@@ -226,7 +282,7 @@ function App() {
         onSignOut={logout}
         onHelp={() =>
           setToast(
-            "Tip: start by adding a department, then create courses and students.",
+            "Tip: create a grade/class section first, then assign it to students.",
           )
         }
         onClose={() => setMobileNav(false)}
@@ -264,6 +320,11 @@ function App() {
               onCreate={openCreate}
               onEdit={(row) => openEdit(activeResource, row)}
               onDelete={(row) => void deleteRecord(activeResource, row)}
+              onManageStudents={
+                activeResource.key === "classes"
+                  ? setManagingClass
+                  : undefined
+              }
             />
           ) : null}
           <AppFooter
@@ -288,6 +349,18 @@ function App() {
             }
           }}
           onSave={saveRecord}
+        />
+      )}
+      {managingClass && (
+        <ClassStudentsDialog
+          schoolClass={managingClass}
+          students={data.students ?? []}
+          classes={data.classes ?? []}
+          saving={saving}
+          onClose={() => {
+            if (!saving) setManagingClass(null);
+          }}
+          onSave={(studentIds) => void saveClassStudents(studentIds)}
         />
       )}
       {loginOpen && (

@@ -40,6 +40,9 @@ collection from the same folder.
 
 On startup, the server creates the application tables if they do not already
 exist, then checks the database connection before listening on port `3000`.
+The Academic menu includes Classes, where you can create sections such as
+`Grade 7A` or `Grade 8B` and assign students to them from the Students form.
+This is separate from Grades, which stores course scores.
 
 ## Run the frontend
 

@@ -84,12 +84,12 @@ export function Dashboard({
       <div className="welcome-banner">
         <div className="welcome-copy">
           <div className="welcome-tag">
-            <Sparkles size={14} /> YOUR CAMPUS AT A GLANCE
+            <Sparkles size={14} /> OVERVIEW
           </div>
           <h1>
-            Good day, Admin <span>✦</span>
+            Welcome back, Admin
           </h1>
-          <p>Here’s what’s happening across your school today.</p>
+          <p>Here’s a summary of activity across your school today.</p>
           <div className="welcome-date">
             <CalendarDays size={15} />
             {today}
@@ -136,7 +136,7 @@ export function Dashboard({
         <div className="panel department-panel">
           <div className="panel-title">
             <div>
-              <span className="eyebrow">YOUR SCHOOL</span>
+              <span className="eyebrow">ANALYTICS</span>
               <h2>Students by department</h2>
             </div>
             <button
@@ -211,14 +211,14 @@ export function Dashboard({
         <div className="panel quick-panel">
           <div className="panel-title">
             <div>
-              <span className="eyebrow">QUICK ACTIONS</span>
-              <h2>Make a move</h2>
+              <span className="eyebrow">SHORTCUTS</span>
+              <h2>Quick actions</h2>
             </div>
             <div className="quick-spark">
               <Sparkles size={16} />
             </div>
           </div>
-          <p className="quick-description">Jump into the things you do most.</p>
+          <p className="quick-description">Jump to your most common tasks.</p>
           <div className="quick-actions">
             <button onClick={() => navigate("students")}>
               <span className="quick-icon q-purple">
@@ -303,8 +303,8 @@ export function Dashboard({
           </div>
         ) : (
           <EmptyState
-            title="Your student directory is ready"
-            subtitle="Students you add will appear here."
+            title="No students yet"
+            subtitle="Newly added students will appear here."
             action="Go to students"
             onAction={() => navigate("students")}
           />
@@ -313,7 +313,7 @@ export function Dashboard({
       <div className="dashboard-bottom">
         <div>
           <CircleDollarSign size={15} />
-          <span>One place for your whole campus.</span>
+          <span>Manage your entire campus from one place.</span>
         </div>
         <button onClick={() => navigate("enrollments")}>
           <ArrowDownRight size={14} /> Manage enrollments

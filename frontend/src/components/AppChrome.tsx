@@ -37,7 +37,7 @@ export function AppHeader({
           {apiOnline === null
             ? "Connecting"
             : apiOnline
-              ? "All systems live"
+              ? "Connected"
               : "API issue"}
         </div>
         <button
@@ -66,7 +66,7 @@ export function AppFooter({ onAbout }: { onAbout: () => void }) {
     <footer className="page-footer">
       <span>© 2027 Ratanak Secondary School</span>
       <span>
-        <span className="footer-dot" /> Your school, beautifully organized
+        <span className="footer-dot" /> Student Management System
       </span>
       <button onClick={onAbout}>
         <Command size={13} /> About

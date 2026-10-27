@@ -1,6 +1,171 @@
 import { useState } from "react";
-import { Check, ShieldCheck, X } from "lucide-react";
+import { Check, Search, ShieldCheck, UsersRound, X } from "lucide-react";
 import type { DataStore, Resource, Row } from "../types";
+
+export function ClassStudentsDialog({
+  schoolClass,
+  students,
+  classes,
+  saving,
+  onClose,
+  onSave,
+}: {
+  schoolClass: Row;
+  students: Row[];
+  classes: Row[];
+  saving: boolean;
+  onClose: () => void;
+  onSave: (studentIds: number[]) => void;
+}) {
+  const [selectedIds, setSelectedIds] = useState<number[]>(() =>
+    students
+      .filter((student) => Number(student.class_id) === Number(schoolClass.id))
+      .map((student) => Number(student.id)),
+  );
+  const [search, setSearch] = useState("");
+  const filteredStudents = students.filter((student) =>
+    `${student.first_name ?? ""} ${student.last_name ?? ""}`
+      .toLowerCase()
+      .includes(search.trim().toLowerCase()),
+  );
+  const selected = new Set(selectedIds);
+
+  function toggleStudent(studentId: number) {
+    setSelectedIds((current) =>
+      current.includes(studentId)
+        ? current.filter((id) => id !== studentId)
+        : [...current, studentId],
+    );
+  }
+
+  return (
+    <div
+      className="modal-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !saving) onClose();
+      }}
+    >
+      <div className="modal-card">
+        <div className="modal-header">
+          <div className="modal-icon">
+            <UsersRound size={20} />
+          </div>
+          <div>
+            <h2>Manage {schoolClass.name} students</h2>
+            <p>Select the students who belong to this class.</p>
+          </div>
+          <button
+            className="icon-button modal-close"
+            onClick={onClose}
+            aria-label="Close"
+            disabled={saving}
+          >
+            <X size={19} />
+          </button>
+        </div>
+        <div style={{ padding: "20px 24px" }}>
+          <div className="table-toolbar" style={{ padding: 0 }}>
+            <span>{selectedIds.length} students selected</span>
+            <label className="search-box">
+              <Search size={16} />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search students..."
+                aria-label="Search students"
+              />
+            </label>
+          </div>
+          <div
+            className="table-scroll"
+            style={{ maxHeight: "min(48vh, 360px)", marginTop: 12 }}
+          >
+            {students.length ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Currently in</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredStudents.map((student) => {
+                    const studentId = Number(student.id);
+                    const currentClass = classes.find(
+                      (item) => Number(item.id) === Number(student.class_id),
+                    );
+                    return (
+                      <tr key={student.id}>
+                        <td>
+                          <label
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              cursor: "pointer",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selected.has(studentId)}
+                              onChange={() => toggleStudent(studentId)}
+                            />
+                            {`${student.first_name ?? ""} ${student.last_name ?? ""}`.trim() ||
+                              `Student #${student.id}`}
+                          </label>
+                        </td>
+                        <td>{currentClass?.name ?? "Unassigned"}</td>
+                      </tr>
+                    );
+                  })}
+                  {!filteredStudents.length && (
+                    <tr>
+                      <td colSpan={2}>No students match your search.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            ) : (
+              <p className="form-note">
+                Create student records before assigning students to a class.
+              </p>
+            )}
+          </div>
+          <div className="form-note">
+            Selecting a student already in another class will move them to{" "}
+            {schoolClass.name}.
+          </div>
+          <div className="modal-actions">
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={onClose}
+              disabled={saving}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => onSave(selectedIds)}
+              disabled={saving}
+            >
+              {saving ? (
+                <>
+                  <span className="button-spinner" /> Saving…
+                </>
+              ) : (
+                <>
+                  <Check size={16} /> Save students
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function RecordDialog({
   resource,
@@ -225,6 +390,8 @@ function getOptions(
     label:
       key === "departments"
         ? row.name
+        : key === "classes"
+          ? row.name
         : key === "courses"
           ? `${row.code} · ${row.name}`
           : `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim() ||

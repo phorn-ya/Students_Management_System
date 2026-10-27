@@ -17,16 +17,25 @@ const schemaStatements = [
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB`,
+  `CREATE TABLE IF NOT EXISTS classes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB`,
   `CREATE TABLE IF NOT EXISTS students (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     department_id INT,
+    class_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_student_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_student_department FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
+    CONSTRAINT fk_student_department FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL,
+    CONSTRAINT fk_student_class FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE SET NULL
   ) ENGINE=InnoDB`,
   `CREATE TABLE IF NOT EXISTS teachers (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -88,5 +97,31 @@ const schemaStatements = [
 export async function initializeDatabase(): Promise<void> {
   for (const statement of schemaStatements) {
     await db.query(statement);
+  }
+
+  const classColumn = await db.query<{ count: number }>(
+    `SELECT COUNT(*) AS count
+     FROM information_schema.columns
+     WHERE table_schema = DATABASE()
+       AND table_name = 'students'
+       AND column_name = 'class_id'`,
+  );
+  if (Number(classColumn.rows[0]?.count ?? 0) === 0) {
+    await db.query('ALTER TABLE students ADD COLUMN class_id INT NULL');
+  }
+
+  const classConstraint = await db.query<{ count: number }>(
+    `SELECT COUNT(*) AS count
+     FROM information_schema.referential_constraints
+     WHERE constraint_schema = DATABASE()
+       AND table_name = 'students'
+       AND constraint_name = 'fk_student_class'`,
+  );
+  if (Number(classConstraint.rows[0]?.count ?? 0) === 0) {
+    await db.query(
+      `ALTER TABLE students
+       ADD CONSTRAINT fk_student_class
+       FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE SET NULL`,
+    );
   }
 }

@@ -8,6 +8,7 @@ import {
   FileText,
   UserRound,
   LayoutDashboard,
+  School,
 } from "lucide-react";
 import type { PageKey, Resource, Row } from "./types";
 
@@ -32,6 +33,11 @@ export const resources: Resource[] = [
         render: (row, app) =>
           findName(app.departments, row.department_id, "name"),
       },
+      {
+        key: "class_id",
+        label: "Grade / class",
+        render: (row, app) => findName(app.classes, row.class_id, "name"),
+      },
     ],
     createFields: [
       { key: "username", label: "Login username", required: true },
@@ -50,6 +56,12 @@ export const resources: Resource[] = [
         type: "select",
         options: "departments",
       },
+      {
+        key: "class_id",
+        label: "Grade / class",
+        type: "select",
+        options: "classes",
+      },
     ],
     editFields: [
       { key: "first_name", label: "First name", required: true },
@@ -59,6 +71,12 @@ export const resources: Resource[] = [
         label: "Department",
         type: "select",
         options: "departments",
+      },
+      {
+        key: "class_id",
+        label: "Grade / class",
+        type: "select",
+        options: "classes",
       },
     ],
     canDelete: true,
@@ -189,6 +207,46 @@ export const resources: Resource[] = [
     ],
     editFields: [
       { key: "name", label: "Department name", required: true },
+      { key: "description", label: "Description", type: "textarea" },
+    ],
+    canDelete: true,
+  },
+  {
+    key: "classes",
+    label: "Classes",
+    singular: "class",
+    endpoint: "/classes",
+    icon: School,
+    columns: [
+      { key: "name", label: "Grade / class section" },
+      { key: "description", label: "Description" },
+      {
+        key: "student_count",
+        label: "Students",
+        render: (row, app) =>
+          String(
+            (app.students ?? []).filter(
+              (student) => Number(student.class_id) === Number(row.id),
+            ).length,
+          ),
+      },
+    ],
+    createFields: [
+      {
+        key: "name",
+        label: "Grade / class section",
+        required: true,
+        placeholder: "e.g. Grade 7A",
+      },
+      { key: "description", label: "Description", type: "textarea" },
+    ],
+    editFields: [
+      {
+        key: "name",
+        label: "Grade / class section",
+        required: true,
+        placeholder: "e.g. Grade 7A",
+      },
       { key: "description", label: "Description", type: "textarea" },
     ],
     canDelete: true,
@@ -372,6 +430,7 @@ export const pageLabels: Record<PageKey, string> = {
   teachers: "Teachers",
   courses: "Courses",
   departments: "Departments",
+  classes: "Classes",
   enrollments: "Enrollments",
   grades: "Grades",
   attendance: "Attendance",
@@ -383,6 +442,7 @@ export const navItems: { key: PageKey; group: string; icon: typeof Users }[] = [
   { key: "teachers", group: "Academic", icon: Users },
   { key: "courses", group: "Academic", icon: BookOpen },
   { key: "departments", group: "Academic", icon: Building2 },
+  { key: "classes", group: "Academic", icon: School },
   { key: "enrollments", group: "Management", icon: ClipboardCheck },
   { key: "grades", group: "Management", icon: FileText },
   { key: "attendance", group: "Management", icon: CalendarDays },

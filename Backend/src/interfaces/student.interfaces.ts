@@ -4,6 +4,7 @@ export interface Student {
   first_name: string;
   last_name: string;
   department_id: number | null;
+  class_id: number | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -13,10 +14,12 @@ export interface CreateStudentDto {
   first_name: string;
   last_name: string;
   department_id?: number | null;
+  class_id?: number | null;
 }
 
 export  interface UpdateStudentDto {
   first_name?: string;
   last_name?: string;
   department_id?: number | null;
+  class_id?: number | null;
 }

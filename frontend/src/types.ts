@@ -7,6 +7,7 @@ export type PageKey =
   | "teachers"
   | "courses"
   | "departments"
+  | "classes"
   | "enrollments"
   | "grades"
   | "attendance";
